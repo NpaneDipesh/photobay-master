@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block title %}Login to Photobay{% endblock %}
+
+{% block content %}
+
+<div class="w3-container"  style="margin: 120px auto 100px auto; width: 400px;">
+<div class="w3-card-4">
+
+    <form class="w3-container" method="post" action=".">
+        <div class="w3-section">
+
+            <h3 class="w3-text-green"><strong>Login</strong></h3>
+
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+                {% for n_error in form.non_field_errors %}
+                    <div class="w3-text-red">{{ n_error|escape }}</div>
+                {% endfor %}
+            {% endif %}
+
+            {% for form_field in form %}
+                <strong>{{ form_field.label_tag }}</strong>
+
+                {% if form_field.errors %}
+                    {% for error in form_field.errors %}
+                        <div class="w3-text-red">{{ error|escape }}</div>
+                    {% endfor %}
+                {% endif %}
+
+                {% if form_field.help_text %}
+                    <div class="w3-text-gray">{{ form_field.help_text|safe }}</div>
+                {% endif %}
+
+                {{ form_field }}
+
+            {% endfor %}
+
+            {% if request.GET.next %}
+                <input type="hidden" name="next" value="{{ request.GET.next }}">
+            {% endif%}
+
+            <div class="w3-text-grey w3-margin-bottom"><small>Both fields may be case sensitive.</small></div>
+
+            <button class="w3-button w3-block w3-green w3-section w3-hover-red w3-padding w3-round" type="submit">Login</button>
+            
+        </div>
+    </form>
+
+</div>
+</div>
+
+{% endblock %}

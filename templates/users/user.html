@@ -1,0 +1,138 @@
+{% extends 'base.html' %} {% load static %}
+
+{% block title %}User Dashboard - Photobay{% endblock %}
+
+{% block content %}
+
+<div class="w3-container w3-content" style="max-width:1400px;margin-top:80px">    
+
+  {% include 'users/sidebar.html' %}
+
+  <div class="w3-col s12 m12 l8">
+
+    <div class="w3-container w3-round w3-light-grey w3-margin">
+      <a href="{% url 'upload' %}" class="w3-button w3-section w3-hover-red w3-mobile w3-round w3-padding-large w3-green">Upload</a>
+      <a href="{% url 'edit_profile' %}" class="w3-button w3-section w3-hover-red w3-mobile w3-round w3-padding-large w3-green">Profile</a>
+      <a href="{% url 'change_password' %}" class="w3-button w3-section w3-hover-red w3-mobile w3-round w3-padding-large w3-green">Password</a>
+      <a href="{% url 'logout' %}" class="w3-button w3-section w3-hover-red w3-mobile w3-round w3-padding-large w3-green">Logout</a>
+    </div>
+  
+  <div class="w3-container" style="margin-bottom: 30px;">
+    <form action="." method="get">
+      <input type="search" name="search" class="w3-input w3-left w3-border" placeholder="Search photos..." style="width:70%; outline:none;" required {% if request.GET.search %}value="{{ request.GET.search }}"{% endif %}>
+      <button class="w3-button w3-green w3-right w3-hover-red" type="submit" style="width:30%; height:41px; outline:none;">Search <i class="fa fa-search"></i></button>
+    </form>
+
+    {% if request.GET.search %}
+      <span class="w3-container">
+        <strong>Search resuts:</strong> {{ request.GET.search }} <a href="{% url 'dashboard' %}" class="w3-text-red" style="text-decoration: none; margin-left: 20px;"><i class="fa fa-remove"></i> clear</a>
+      </span>
+    {% endif %}
+  </div>
+
+  {% if no_posts_found %}
+    <div class="w3-container w3-card w3-round w3-border w3-pale-red w3-margin">
+      <p>No photos found. You can search using,
+        <ul>
+          <li>Title</li>
+          <li>Category</li>
+          <li>Camera</li>
+          <li>Location</li>
+          <li>Tags</li>
+        </ul>
+      </p>
+    </div>
+  {% endif %}
+
+  {% for item in data %}
+  <div class="w3-container w3-card w3-round w3-border w3-margin">
+
+    <div class="w3-half w3-padding w3-center" style="">
+      <img src="{{ item.image.url }}" style="max-width: 100%; max-height: 100%;" class="w3-image w3-round w3-border w3-section">
+    </div>
+
+    <div class="w3-half w3-padding">
+      <table class="w3-table w3-section w3-bordered">
+        <tr>
+          <td>Title</td>
+          <td>{{ item.title }}</td>
+        </tr>
+        <tr>
+          <td>Type</td>
+          <td>{{ item.image_type }}</td>
+        </tr>
+        <tr>
+          <td>Resolution</td>
+          <td>{{ item.image.width }} X {{ item.image.height }}</td>
+        </tr>
+        <tr>
+          <td>Date</td>
+          <td>{{ item.uploaded_on }}</td>
+        </tr>
+        <tr>
+          <td>Camera</td>
+          <td>{{ item.camera }}</td>
+        </tr>
+        <tr>
+          <td>Location</td>
+          <td>{{ item.location }}</td>
+        </tr>
+      </table>
+      <a href="{% url 'edit' item.slug %}" style="text-decoration:none;" class="w3-text-green w3-hover-text-red"><i class="fa fa-pencil"></i> Edit Details</a>
+    </div>
+
+    <div class="w3-container w3-center w3-section">
+      <hr/>
+      <span class="w3-margin-right w3-hide-small"><i class="fa fa-eye"></i> {{ item.views_count }} Views</span> 
+      <span class="w3-text-red w3-margin-right"><i class="fa fa-heart"></i> {{ item.like_set.count }} Likes</span> 
+      <span class="w3-text-green"><i class="fa fa-download"></i> {{ item.save_set.all.count }} Saves</span> 
+    </div>
+
+  </div>
+  {% endfor %}
+  
+  {% if data.paginator.num_pages > 1 %}
+    <div class="w3-container w3-section w3-center">
+      <div class="w3-bar w3-border w3-round">
+
+        {% if data.number != 1 %}
+          <a href="{{ base_url }}page=1" class="w3-bar-item w3-green w3-hover-red w3-button">First</a>
+        {% else %}
+          <button class="w3-bar-item w3-green w3-hover-green w3-button" disabled>First</button>
+        {% endif %}
+
+        {% if data.has_previous %}
+          <a href="{{ base_url }}page={{ data.previous_page_number }}" class="w3-bar-item w3-green w3-hover-red w3-button">&laquo; Previous</a>
+        {% else %}
+          <button class="w3-bar-item w3-green w3-hover-green w3-button" disabled>&laquo;</button>
+        {% endif %}
+
+        {% for i in data.paginator.page_range %}
+          {% if data.number == i %}
+            <button class="w3-bar-item w3-red w3-hover-red w3-button">{{ i }}</button>
+          {% elif data.number > i|add:"-3" and data.number < i|add:"+3"%}
+            <a href="{{ base_url }}page={{ i }}" class="w3-bar-item w3-hide-small w3-green w3-hover-red w3-button">{{ i }}</a>
+          {% endif %}
+        {% endfor %}
+
+        {% if data.has_next %}
+          <a href="{{ base_url }}page={{ data.next_page_number }}" class="w3-bar-item w3-green w3-hover-red w3-button">Next &raquo;</a>
+        {% else %}
+          <button class="w3-bar-item w3-green w3-hover-green w3-button" disabled>&raquo;</button>
+        {% endif %}
+
+        {% if data.paginator.num_pages != data.number %}
+          <a href="{{ base_url }}page={{ data.paginator.num_pages }}" class="w3-bar-item w3-green w3-hover-red w3-button">Last</a>
+        {% else %}
+          <button class="w3-bar-item w3-green w3-hover-green w3-button" disabled>Last</button>
+        {% endif %}
+
+      </div>
+    </div>
+  {% endif %}
+
+</div>
+
+</div>
+ 
+{% endblock %}

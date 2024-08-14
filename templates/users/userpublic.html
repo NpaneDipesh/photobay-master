@@ -1,0 +1,161 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ person.first_name }} {{ person.last_name }} ({{ person.username }}) - Photobay{% endblock %}
+
+{% block content %} {% load static %}
+
+<div class="w3-display-container w3-center"  style="margin-top:46px">
+   <img class="w3-image w3-opacity" src="{{ home.image.url }}" style="height:500px; width:100%">
+
+   <div class="w3-display-middle w3-center w3-container">
+
+       <h2 style="text-shadow:1px 1px 0 #444">{{ person.first_name }} {{ person.last_name }}</h2>
+
+        <p>
+           {% if person.profile_picture %}
+              <img src="{{ person.profile_picture.url }}" class="w3-circle w3-hide-small w3-hide-medium" style="width:40%">
+              <img src="{{ person.profile_picture.url }}" class="w3-circle w3-hide-small w3-hide-large" style="width:50%">
+              <img src="{{ person.profile_picture.url }}" class="w3-circle w3-hide-medium w3-hide-large" style="width:70%">
+           {% else %}
+              <img src="{% static 'images/user_blank.png' %}" class="w3-circle w3-hide-small w3-hide-medium" style="width:40%">
+              <img src="{% static 'images/user_blank.png' %}" class="w3-circle w3-hide-small w3-hide-large" style="width:50%">
+              <img src="{% static 'images/user_blank.png' %}" class="w3-circle w3-hide-medium w3-hide-large" style="width:70%">
+           {% endif %}
+        </p>
+
+         {% if person.fb_username or person.tw_username or person.in_username %}
+            <div class="w3-container w3-center w3-section">
+               {% if person.fb_username %}
+                 <a href="https://www.facebook.com/{{ person.fb_username }}" style="text-decoration: none;" class="w3-button w3-tiny w3-indigo w3-round-large w3-hover-green"><i class="fa fa-facebook"></i></a>
+               {% endif %}
+               {% if person.tw_username %}
+                 <a href="https://www.twitter.com/{{ person.tw_username }}" style="text-decoration: none;" class="w3-button w3-tiny w3-blue w3-round-large w3-text-white w3-hover-green"><i class="fa fa-twitter"></i></a>
+               {% endif %}
+               {% if person.in_username %}
+                 <a href="https://www.instagram.com/{{ person.in_username }}" style="text-decoration: none;" class="w3-button w3-tiny w3-red w3-round-large w3-hover-green"><i class="fa fa-instagram"></i></a>
+               {% endif %}
+            </div>
+         {% endif %}
+
+         <div class="w3-container w3-center w3-section">
+            <a href="mailto:{{ person.email }}" style="text-decoration: none;" class="w3-button w3-tiny w3-grey w3-round-large w3-hover-green"><i class="fa fa-envelope"></i></a>
+            <a href="#" style="text-decoration: none;" class="w3-button w3-tiny w3-green w3-round-large w3-hover-grey"><i class="fa fa-money"></i> Donate</a>
+         </div>
+
+        <hr/>
+        
+        {% if person.profession or person.address %}
+           <div class="w3-container" style="text-shadow:1px 1px 0 #444">
+
+               <div class="w3-hide-small w3-hide-medium ">
+                  {% if person.profession %}
+                     <i class="fa fa-pencil"></i> {{ person.profession }}
+                  {% endif %}
+                  {% if person.address %}
+                     <i class="fa fa-home w3-margin-left"></i> {{ person.address }}
+                  {% endif %}
+                  <i class="fa fa-photo w3-margin-left"></i> {{ person.photo_set.all.count }}
+               </div>
+
+               <div class="w3-hide-large">
+                  {% if person.profession %}
+                     <i class="fa fa-pencil"></i> {{ person.profession }}
+                  {% endif %}
+                  <br>
+                  {% if person.address %}
+                     <i class="fa fa-home"></i> {{ person.address }}
+                  {% endif %}
+                  <br>
+                  <i class="fa fa-photo"></i> {{ person.photo_set.all.count }}
+               </div>
+             
+           </div>
+        {% endif %}
+        
+   </div>
+
+</div>
+
+<div class="w3-content" style="margin-top:25px; max-width:1500px">
+
+   <section class="w3-container w3-section" id="photos">
+      {% for item in data %}
+
+      <div class="w3-display-container" style="margin-bottom: 5px;">
+         <div class="img-container">
+
+            <a href="{% url 'single' item.user.username item.slug %}">
+            <img src="{{ item.image.url }}">
+            </a>
+
+            <div class="w3-display-bottomleft w3-display-hover w3-margin">
+            <a href="{% url 'public_profile' item.user.username %}" class="w3-text-white" style="text-decoration: none;"> <i class="fa fa-user"></i> {{ item.user.username }}</a>
+            </div>
+
+            <div class="w3-display-bottomright w3-display-hover w3-margin">
+            <span class="w3-text-white"> <i class="fa fa-heart"></i> {{ item.like_set.all.count }}</span>
+            </div>
+
+         </div>
+      </div>
+
+      {% endfor %}
+   </section>
+
+   {% if data.paginator.num_pages > 1 %}
+    <div class="w3-container w3-section w3-center">
+      <div class="w3-bar w3-border w3-round">
+
+        {% if data.number != 1 %}
+          <a href="{{ base_url }}page=1" class="w3-bar-item w3-green w3-hover-red w3-button">First</a>
+        {% else %}
+          <button class="w3-bar-item w3-green w3-hover-green w3-button" disabled>First</button>
+        {% endif %}
+
+        {% if data.has_previous %}
+          <a href="{{ base_url }}page={{ data.previous_page_number }}" class="w3-bar-item w3-green w3-hover-red w3-button">&laquo; Previous</a>
+        {% else %}
+          <button class="w3-bar-item w3-green w3-hover-green w3-button" disabled>&laquo;</button>
+        {% endif %}
+
+        {% for i in data.paginator.page_range %}
+          {% if data.number == i %}
+            <button class="w3-bar-item w3-red w3-hover-red w3-button">{{ i }}</button>
+          {% elif data.number > i|add:"-3" and data.number < i|add:"+3"%}
+            <a href="{{ base_url }}page={{ i }}" class="w3-bar-item w3-hide-small w3-green w3-hover-red w3-button">{{ i }}</a>
+          {% endif %}
+        {% endfor %}
+
+        {% if data.has_next %}
+          <a href="{{ base_url }}page={{ data.next_page_number }}" class="w3-bar-item w3-green w3-hover-red w3-button">Next &raquo;</a>
+        {% else %}
+          <button class="w3-bar-item w3-green w3-hover-green w3-button" disabled>&raquo;</button>
+        {% endif %}
+
+        {% if data.paginator.num_pages != data.number %}
+          <a href="{{ base_url }}page={{ data.paginator.num_pages }}" class="w3-bar-item w3-green w3-hover-red w3-button">Last</a>
+        {% else %}
+          <button class="w3-bar-item w3-green w3-hover-green w3-button" disabled>Last</button>
+        {% endif %}
+
+      </div>
+    </div>
+  {% endif %}
+
+  {% if no_posts_found %}
+  <div class="w3-container w3-card w3-round w3-border w3-pale-red w3-margin">
+    <p>Seems like this user has no photos uploaded. What you can do:
+      <ul>
+        <li>Go to home page</li>
+        <li>Go to browse page</li>
+        <li>Search for photos</li>
+        <li>Browse through menu</li>
+        
+      </ul>
+    </p>
+  </div>
+{% endif %}
+
+</div>
+
+{% endblock %}

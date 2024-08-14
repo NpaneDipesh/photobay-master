@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+
+{% block title %}Browse Beautiful Photos by Motivated Photographers - Photobay{% endblock %}
+
+{% block content %} {% load static %}
+
+<div class="w3-content" style="margin-top:65px; max-width:1500px">
+
+    <div class="w3-container">
+        <div class="w3-bar w3-light-grey w3-round w3-padding">
+            <div class="w3-container w3-section">
+                <form action="." method="get">
+                    <input type="search" name="search" class="w3-input w3-left w3-border" placeholder="Search photos..." style="width:70%; outline:none;" required {% if request.GET.search %}value="{{ request.GET.search }}"{% endif %}>
+                    <button class="w3-button w3-green w3-right w3-hover-red" type="submit" style="width:30%; height:41px; outline:none;">Search <i class="fa fa-search"></i></button>
+                </form>
+
+                {% if request.GET.search or request.GET.category or request.GET.camera or request.GET.location %}
+                <span class="w3-container">
+                    {% if request.GET.search %}
+                      <strong>Search resuts:</strong> {{ request.GET.search }}
+                    {% elif request.GET.category %}
+                      <strong>Category resuts:</strong> {{ request.GET.category }}
+                    {% elif request.GET.camera %}
+                      <strong>Camera resuts:</strong> {{ request.GET.camera }}
+                    {% elif request.GET.location %}
+                      <strong>Location resuts:</strong> {{ request.GET.location }}
+                    {% endif %}
+                      
+                    <a href="{% url 'browse' %}" class="w3-text-red" style="text-decoration: none; margin-left: 20px;"><i class="fa fa-remove"></i> clear</a>
+                </span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+  <section class="w3-container w3-section" id="photos">
+    {% for item in data %}
+
+      <div class="w3-display-container" style="margin-bottom: 5px;">
+        <div class="img-container">
+
+          <a href="{% url 'single' item.user.username item.slug %}">
+            <img src="{{ item.image.url }}">
+          </a>
+
+          <div class="w3-display-bottomleft w3-display-hover w3-margin">
+            <a href="{% url 'public_profile' item.user.username %}" class="w3-text-white" style="text-decoration: none;"> <i class="fa fa-user"></i> {{ item.user.username }}</a>
+          </div>
+
+          <div class="w3-display-bottomright w3-display-hover w3-margin">
+            <span class="w3-text-white"> <i class="fa fa-heart"></i> {{ item.like_set.all.count }}</span>
+          </div>
+
+        </div>
+      </div>
+
+    {% endfor %}
+  </section>
+
+  {% if data.paginator.num_pages > 1 %}
+    <div class="w3-container w3-section w3-center">
+      <div class="w3-bar w3-border w3-round">
+
+        {% if data.number != 1 %}
+          <a href="{{ base_url }}page=1" class="w3-bar-item w3-green w3-hover-red w3-button">First</a>
+        {% else %}
+          <button class="w3-bar-item w3-green w3-hover-green w3-button" disabled>First</button>
+        {% endif %}
+
+        {% if data.has_previous %}
+          <a href="{{ base_url }}page={{ data.previous_page_number }}" class="w3-bar-item w3-green w3-hover-red w3-button">&laquo; Previous</a>
+        {% else %}
+          <button class="w3-bar-item w3-green w3-hover-green w3-button" disabled>&laquo;</button>
+        {% endif %}
+
+        {% for i in data.paginator.page_range %}
+          {% if data.number == i %}
+            <button class="w3-bar-item w3-red w3-hover-red w3-button">{{ i }}</button>
+          {% elif data.number > i|add:"-3" and data.number < i|add:"+3"%}
+            <a href="{{ base_url }}page={{ i }}" class="w3-bar-item w3-hide-small w3-green w3-hover-red w3-button">{{ i }}</a>
+          {% endif %}
+        {% endfor %}
+
+        {% if data.has_next %}
+          <a href="{{ base_url }}page={{ data.next_page_number }}" class="w3-bar-item w3-green w3-hover-red w3-button">Next &raquo;</a>
+        {% else %}
+          <button class="w3-bar-item w3-green w3-hover-green w3-button" disabled>&raquo;</button>
+        {% endif %}
+
+        {% if data.paginator.num_pages != data.number %}
+          <a href="{{ base_url }}page={{ data.paginator.num_pages }}" class="w3-bar-item w3-green w3-hover-red w3-button">Last</a>
+        {% else %}
+          <button class="w3-bar-item w3-green w3-hover-green w3-button" disabled>Last</button>
+        {% endif %}
+
+      </div>
+    </div>
+  {% endif %}
+
+  {% if no_posts_found %}
+    <div class="w3-container w3-card w3-round w3-border w3-pale-red w3-margin">
+      <p>No photos found. You can search photos by its,
+        <ul>
+          <li>Title</li>
+          <li>Tags</li>
+          <li>Description</li>
+        </ul>
+        or browse through menus to search by
+        <ul>
+          <li>Category</li>
+          <li>Camera</li>
+          <li>Location</li>
+          <li>Users</li>
+          
+        </ul>
+      </p>
+    </div>
+  {% endif %}
+
+</div>
+
+{% endblock %}
